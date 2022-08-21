@@ -16,19 +16,49 @@ options:
 ```
 
 ## Coding
+
 ```python
 # pycociC/__init__.py
+__all__ = ('FP_RE', 'bytes_to_pretty_view', 'eat_cache', 'dont_write_bytecode')
 FP_RE = re.compile(r'.*\.py([co]|.*\.nb[ci])', re.I)
 
 
+@_run_with_max_recursion
 def eat_cache(at_dirs: Iterable[AnyStr, os.PathLike[AnyStr]] = ('.',)):
     """Function removes files matching the regular expression (see FP_RE) from all "__pycache__" folders recursively."""
     ...
 
 
 def dont_write_bytecode() -> bool:
-    """return True if env PYTHONDONTWRITEBYTECODE or -B arg passed else False"""
+    """
+    return True if env PYTHONDONTWRITEBYTECODE or -B arg passed else False
+
+    >>> import os
+    >>> os.environ['PYTHONDONTWRITEBYTECODE'] = 'x'
+    >>> dont_write_bytecode()
+    True
+    >>> del os.environ['PYTHONDONTWRITEBYTECODE']  # or os.environ['PYTHONDONTWRITEBYTECODE'] = ''
+    >>> dont_write_bytecode()
+    False
+    """
     ...
+
+
+def bytes_to_pretty_view(bytes_size: int | float, *, skip_zero: bool = False) -> str:
+    """
+    Converts the number of bytes into a pretty SI prefix.
+
+    >>> bytes_to_pretty_view(0)
+    '0B'
+    >>> bytes_to_pretty_view(0, skip_zero=True)
+    ''
+    >>> bytes_to_pretty_view(1_000_000_24.)
+    '100MB 24B'
+    >>> bytes_to_pretty_view(0xFF_FF_FF_FF)
+    '4GB 294MB 967kB 295B'
+    """
+    ...
+
 ```
 
 ### Example Output
