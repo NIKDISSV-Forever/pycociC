@@ -121,6 +121,8 @@ def bytes_to_pretty_view(bytes_size: int | float, *, skip_zero: bool = False) ->
     '100MB 24B'
     >>> bytes_to_pretty_view(0xFF_FF_FF_FF)
     '4GB 294MB 967kB 295B'
+    >>> bytes_to_pretty_view(10**31)
+    '10,000YB'
     """
     if skip_zero and not bytes_size:
         return ''
