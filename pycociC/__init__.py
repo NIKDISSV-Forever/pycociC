@@ -9,15 +9,15 @@ from functools import wraps
 from pathlib import Path
 from typing import AnyStr, Callable, Iterable, TypeVar
 
-__all__ = ('eat_cache', 'dont_write_bytecode', 'FP_RE')
+__all__ = ('FP_RE', 'bytes_to_pretty_view', 'eat_cache', 'dont_write_bytecode')
 FP_RE = re.compile(r'.*\.py([co]|.*\.nb[ci])', re.I)
 _T = TypeVar('_T')
 
 
-def _run_max_recursion(func: Callable[[...], _T] | None = None, *, recursion_limit: int = 0x7F_FF_FF_FF,
-                       stack_size: int = 0xFF_FF_FF_F) -> (
+def _run_with_max_recursion(func: Callable[[...], _T] | None = None, *, recursion_limit: int = 0x7F_FF_FF_FF,
+                            stack_size: int = 0xFF_FF_FF_F) -> (
         Callable[[Callable[[...], _T]], Callable[[...], _T]] | Callable[[...], _T]):
-    """sys.setrecursionlimit and threading.stack_size from kwargs and start func"""
+    """Decorator for sys.setrecursionlimit and threading.stack_size from kwargs and start func"""
 
     def run_max_recursion_decorator(func: Callable[[...], _T]) -> Callable[[...], _T]:
         @wraps(func)
@@ -49,18 +49,7 @@ def _run_max_recursion(func: Callable[[...], _T] | None = None, *, recursion_lim
 def _ignore(_): pass
 
 
-def _bytes_to_pretty_view(bytes_size: int) -> str:
-    """converts the number of bytes into a pretty SI prefix."""
-    if bytes_size < 1000:
-        return '1 byte' if bytes_size == 1 else f'{bytes_size} bytes'
-    bytes_size /= 1000
-    for prefix in 'kMGTPEZY':
-        if bytes_size < 1000.:
-            return f'{bytes_size:,g} {prefix}B'
-        bytes_size /= 1000.
-
-
-@_run_max_recursion
+@_run_with_max_recursion
 def eat_cache(at_dirs: Iterable[AnyStr, os.PathLike[AnyStr]] = ('.',)):
     """Function removes files matching the regular expression (see FP_RE) from all "__pycache__" folders recursively."""
     print(f"Starting for {', '.join(at_dirs)}\n\n")
@@ -82,7 +71,7 @@ def eat_cache(at_dirs: Iterable[AnyStr, os.PathLike[AnyStr]] = ('.',)):
                         fp_size = target.stat().st_size
                         os.remove(target)
                         removed += fp_size
-                        print(f'\t{filename} ({_bytes_to_pretty_view(fp_size)})')
+                        print(f'\t{filename} ({bytes_to_pretty_view(fp_size)})')
                     except OSError:
                         continue
             try:
@@ -92,11 +81,21 @@ def eat_cache(at_dirs: Iterable[AnyStr, os.PathLike[AnyStr]] = ('.',)):
                 pass
             print()
 
-    print(f'\nRemoved {_bytes_to_pretty_view(removed)}')
+    print(f'\nRemoved {bytes_to_pretty_view(removed)}')
 
 
 def dont_write_bytecode() -> bool:
-    """return True if env PYTHONDONTWRITEBYTECODE or -B arg passed else False"""
+    """
+    return True if env PYTHONDONTWRITEBYTECODE or -B arg passed else False
+
+    >>> import os
+    >>> os.environ['PYTHONDONTWRITEBYTECODE'] = 'x'
+    >>> dont_write_bytecode()
+    True
+    >>> del os.environ['PYTHONDONTWRITEBYTECODE']  # or os.environ['PYTHONDONTWRITEBYTECODE'] = ''
+    >>> dont_write_bytecode()
+    False
+    """
     env_flag = os.getenv('PYTHONDONTWRITEBYTECODE')
     if env_flag is not None:
         return bool(env_flag)
@@ -108,3 +107,31 @@ def dont_write_bytecode() -> bool:
         if argv[i] == '-B':
             return True
     return False
+
+
+def bytes_to_pretty_view(bytes_size: int | float, *, skip_zero: bool = False) -> str:
+    """
+    Converts the number of bytes into a pretty SI prefix.
+
+    >>> bytes_to_pretty_view(0)
+    '0B'
+    >>> bytes_to_pretty_view(0, skip_zero=True)
+    ''
+    >>> bytes_to_pretty_view(1_000_000_24.)
+    '100MB 24B'
+    >>> bytes_to_pretty_view(0xFF_FF_FF_FF)
+    '4GB 294MB 967kB 295B'
+    """
+    if skip_zero and not bytes_size:
+        return ''
+
+    def _form_str() -> str:
+        mod = bytes_size % power
+        return f"{int(bytes_size // power):,}{prefix}B{f' {bytes_to_pretty_view(mod, skip_zero=True)}' if mod else ''}"
+
+    power = 1
+    for prefix in ('', *'kMGTPEZY'):
+        if (bytes_size / power) < 1000.:
+            return _form_str()
+        power *= 1000
+    return _form_str()
