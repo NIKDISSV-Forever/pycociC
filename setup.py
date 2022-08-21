@@ -8,7 +8,7 @@ with open('requirements.txt', encoding='UTF-8') as f:
 setuptools.setup(
     name="pycociC",
 
-    version="1.0.0",
+    version="1.1.0",
 
     author="Nikita (NIKDISSV)",
     author_email="nikdissv@proton.me",
