@@ -65,7 +65,7 @@ def bytes_to_pretty_view(bytes_size: int | float, *, skip_zero: bool = False) ->
 
 > python -m pycociC -d .
 
-```stdout
+```
 WARNING:root:pycociC doesn't remove bytecode files.
         You can use "-B" option of python or PYTHONDONTWRITEBYTECODE=x to do so.
 
@@ -74,27 +74,20 @@ Starting for .
 
 
 pycociC\__pycache__
-        __init__.cpython-310.pyc (3.53 kB)
-        __main__.cpython-310.pyc (1.15 kB)
-pycociC\__pycache__  # if dir was removed only
-
-venv\Lib\site-packages\psutil\__pycache__
-        _common.cpython-310.pyc (21.95 kB)
-        _compat.cpython-310.pyc (11.883 kB)
-        _pswindows.cpython-310.pyc (28.902 kB)
-        __init__.cpython-310.pyc (63.508 kB)
-venv\Lib\site-packages\psutil\__pycache__
+        __init__.cpython-310.pyc (4kB 699B)
+        __main__.cpython-310.pyc (1kB 153B)
+pycociC\__pycache__  # only if the folder has been deleted
 
 venv\Lib\site-packages\_distutils_hack\__pycache__
-        __init__.cpython-310.pyc (7.591 kB)
+        __init__.cpython-310.pyc (7kB 593B)
 venv\Lib\site-packages\_distutils_hack\__pycache__
 
 venv\Lib\site-packages\__pycache__
-        _virtualenv.cpython-310.pyc (4.105 kB)
+        _virtualenv.cpython-310.pyc (4kB 107B)
 venv\Lib\site-packages\__pycache__
 
 
-Removed 142.619 kB
+Removed 17kB 552B
 ```
 
 > python -B -m pycociC
@@ -104,22 +97,31 @@ Starting for C:\, D:\
 
 
 C:\...\Python310\Lib\collections\__pycache__
-        abc.cpython-310.pyc (251 bytes)
-        __init__.cpython-310.pyc (48.468 kB)
+        abc.cpython-310.pyc (251B)
+        __init__.cpython-310.pyc (48kB 468B)
 C:\...\Python310\Lib\collections\__pycache__
 
-C:\...\Python310\Lib\ctypes\__pycache__
-        wintypes.cpython-310.pyc (4.871 kB)
-        _endian.cpython-310.pyc (1.914 kB)
-        __init__.cpython-310.pyc (15.895 kB)
-C:\...\Python310\Lib\ctypes\__pycache__
+C:\...\Python310\Lib\importlib\__pycache__  
+        abc.cpython-310.pyc (15kB 904B)
+        ...
+        __init__.cpython-310.pyc (3kB 818B)
+C:\...\Python310\Lib\importlib\__pycache__  
+
+C:\...\Python310\Lib\urllib\__pycache__
+        parse.cpython-310.pyc (33kB 817B)
+        __init__.cpython-310.pyc (144B)
+C:\...\Python310\Lib\urllib\__pycache__
 
         ...
 
-D:\Documents\Projects\...\venv\Lib\site-packages\__pycache__
-        _virtualenv.cpython-310.pyc (4.105 kB)
-D:\Documents\Projects\...\venv\Lib\site-packages\__pycache__
+D:\...\venv\Lib\site-packages\_distutils_hack\__pycache__
+        __init__.cpython-310.pyc (7kB 593B)
+D:\...\venv\Lib\site-packages\_distutils_hack\__pycache__
+
+D:\...\venv\Lib\site-packages\__pycache__
+        _virtualenv.cpython-310.pyc (4kB 107B)
+D:\...\venv\Lib\site-packages\__pycache__
 
 
-Removed 3.3568 MB
+Removed 1MB 481kB 138B
 ```
